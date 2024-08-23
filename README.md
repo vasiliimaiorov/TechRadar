@@ -33,7 +33,7 @@ http://localhost:8080/swagger-ui/index.html
 ```
 Первым делом посылаем запрос на /api/auth/login
 
-**Пользователи**
+**Пользователи:**
 * обычный 
   * login: user
   * password: 123
