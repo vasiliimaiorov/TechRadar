@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: t1
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+logging:
+  level:
+    org:
+      springframework.security.web: DEBUG
+      springframework.data.jpa: DEBUG
+      hibernate:
+        type.descriptor.sql.BasicBinder=TRACE: TRACE
+        SQL: DEBUG
+
+jwt:
+  secret: #base64
+    access: 0LLQvtC30YzQvNC40YLQtSDQvdCwINGB0YLQsNC20LjRgNC+0LLQutGDINC/0LY=
+    refresh: 0YHQvdC+0LLQsCDRjdGC0Lgg0YLQvtC60LXQvdGLINCz0LXQvdC10YDQuNGC0Yw=
+  expiration:
+    access: 60 # minutes
+    refresh: 30 # days
