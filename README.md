@@ -1,8 +1,3 @@
-# Распределение работы backend
-Чернова Елизавета - сущности TechSolution and Characteristics и все с ними связанное
-
-Канукова Ева - User and Score
-
 ## Для backend
 ```
 mvn clean package -DskipTests
