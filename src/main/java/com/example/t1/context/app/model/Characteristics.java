@@ -3,9 +3,11 @@ package com.example.t1.context.app.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "characteristics_in_time")
@@ -20,21 +22,22 @@ public class Characteristics {
     @Column(name = "id")
     private Long id;
 
-    @Column(nullable = false)
-    private Date time;
+    @PastOrPresent
+    @Column(nullable = false, unique = true)
+    private LocalDateTime time;
 
-
+    @PositiveOrZero
     @Column(name = "uses_num")
     private Integer usesNum;
 
-    @Min(1)
+    @Min(0)
     @Max(10)
     @Column(name = "average_score")
     private Double averageScore;
 
-    @Min(1)
+    @Min(0)
     @Max(15)
-    private Double effectiveness ;
+    private Double effectiveness;
 
     @ManyToOne
     @JoinColumn(name="tech_solution_id")

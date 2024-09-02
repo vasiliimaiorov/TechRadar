@@ -1,3 +1,8 @@
+# Распределение работы backend
+Чернова Елизавета - сущности TechSolution and Characteristics и все с ними связанное
+
+Канукова Ева - User and Score
+
 ## Для backend
 ```
 mvn clean package -DskipTests
@@ -44,4 +49,10 @@ http://localhost:8080/swagger-ui/index.html
 Копируем accessToken из ответа и вставляем поле authorize в начале страницы.
 Теперь будут доступны остальные эндпоинты с авторизацией.
 
-# TechRadar
+
+для удобства вставки
+
+{
+"login": "user",
+"password": "123"
+}

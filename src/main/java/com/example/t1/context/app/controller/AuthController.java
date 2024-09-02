@@ -1,8 +1,8 @@
 package com.example.t1.context.app.controller;
 
 import com.example.t1.context.app.api.LoginRequest;
-import com.example.t1.context.app.api.JwtResponse;
 import com.example.t1.context.app.api.JwtRefreshRequest;
+import com.example.t1.context.app.api.RegisterRequest;
 import com.example.t1.context.app.service.AuthService;
 import jakarta.security.auth.message.AuthException;
 import jakarta.validation.Valid;
@@ -26,6 +26,16 @@ public class AuthController {
         } catch (AuthException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<String> register(@RequestBody @Valid RegisterRequest request) {
+        if (authService.checkIfUserExists(request.login())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Username already exist");
+        }
+
+        final var newUser = authService.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newUser.getRole().toString());
     }
 
     @PostMapping("/token")

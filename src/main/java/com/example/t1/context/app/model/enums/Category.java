@@ -1,23 +1,20 @@
 package com.example.t1.context.app.model.enums;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@RequiredArgsConstructor
 public enum Category {
 
-    LANGUAGES_FRAMEWORKS("LANGUAGES & FRAMEWORKS"),
-    TECHNIQUES_TOOLS("TECHNIQUES & TOOLS"),
-    PLATFORMS_INFRASTRUCTURE("PLATFORMS & INFRASTRUCTURE"),
-    DATA_MANAGEMENT("DATA MANAGEMENT");
-
-    private final String category;
-
-    Category(String category) {
-        this.category = category;
-    }
-
+    LANGUAGES,
+    TOOLS,
+    TECHNIQUES,
+    PLATFORMS;
 
     @Override
     public String toString() {
         return super.toString().toUpperCase();
     }
-
 
 }

@@ -25,16 +25,18 @@ public class User implements UserDetails {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    @Size(min = 5, max = 50)
+    @Size(min = 4, max = 50)
     private String login;
 
     @Column(nullable = false)
-    @Size(min = 5, max = 50)
     private String password;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Score> scores;
 
     @Override
     public List<? extends GrantedAuthority> getAuthorities() {

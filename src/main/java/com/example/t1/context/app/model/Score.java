@@ -11,20 +11,24 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table
-@IdClass(ScoreId.class)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Score {
 
-    @Id
-    @Column(name = "user_id")
-    private Long userId;
+    @EmbeddedId
+    private ScoreId id;
 
-    @Id
-    @Column(name = "tech_solution_id")
-    private Long techSolutionId;
+    @JoinColumn(name = "user_id")
+    @MapsId("userId")
+    @ManyToOne
+    private User user;
+
+    @JoinColumn(name = "tech_solution_id")
+    @MapsId("techSolutionId")
+    @ManyToOne
+    private TechSolution techSolution;
 
     @Column(name = "score_value")
     @Min(1)

@@ -6,13 +6,11 @@ import org.springframework.security.core.GrantedAuthority;
 @RequiredArgsConstructor
 public enum UserRole implements GrantedAuthority {
 
-    ADMIN("ADMIN"),
-    VOTER("VOTER");
-
-    private final String vale;
+    ADMIN,
+    VOTER;
 
     @Override
     public String getAuthority() {
-        return vale;
+        return super.toString().toUpperCase();
     }
 }

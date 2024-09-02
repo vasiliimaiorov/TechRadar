@@ -1,10 +1,9 @@
 package com.example.t1.context.app.api;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import com.example.t1.context.app.model.enums.UserRole;
+import jakarta.validation.constraints.*;
 
-public record LoginRequest(
+public record RegisterRequest(
         @NotBlank (message = "Login can't be blank")
         @Size(min = 4, max = 50)
         @Pattern (regexp = "^[a-zA-Z0-9_]*$", message = "Login can contain [a-zA-Z0-9_]")
@@ -13,4 +12,7 @@ public record LoginRequest(
         @NotBlank (message = "Password can't be blank")
         @Size(min = 3, max = 50)
         @Pattern (regexp = "^[a-zA-Z0-9_]*$", message = "Password can contain [a-zA-Z0-9_]")
-        String password) {}
+        String password,
+
+        @NotNull (message = "Role can't be null")
+        UserRole role) {}

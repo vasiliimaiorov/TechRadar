@@ -2,6 +2,8 @@ package com.example.t1.context.app.service;
 
 import com.example.t1.api.security.jwt.JwtProvider;
 import com.example.t1.context.app.api.JwtResponse;
+import com.example.t1.context.app.api.RegisterRequest;
+import com.example.t1.context.app.model.User;
 import jakarta.security.auth.message.AuthException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +22,7 @@ public class AuthService {
     public JwtResponse login(@NonNull String login, @NonNull String password) throws AuthException {
         try {
             final var user = userService.getByLogin(login);
-            System.out.println(encoder.encode(user.getPassword()));
+
             if (encoder.matches(password, user.getPassword())) {
                 final var accessToken = jwtProvider.generateAccessToken(user);
                 final var refreshToken = jwtProvider.generateRefreshToken(user);
@@ -30,6 +32,10 @@ public class AuthService {
         } catch (UsernameNotFoundException e) {
             throw new AuthException("User not found");
         }
+    }
+
+    public User register(@NonNull RegisterRequest request) {
+        return userService.addUser(request);
     }
 
     public JwtResponse getNewAccessToken(@NonNull String refreshToken) throws AuthException {
@@ -51,6 +57,10 @@ public class AuthService {
             return new JwtResponse(newAccessToken, newRefreshToken, dbUser.getRole());
         }
         throw new AuthException("Invalid refresh JWT token");
+    }
+
+    public boolean checkIfUserExists(String login) {
+        return userService.checkIfExists(login);
     }
 
 }

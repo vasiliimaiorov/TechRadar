@@ -1,5 +1,6 @@
 package com.example.t1.context.app.service;
 
+import com.example.t1.api.exeptions.InvalidUrlException;
 import com.example.t1.context.app.dto.TechSolutionDTO;
 import com.example.t1.context.app.mapper.TechSolutionMapper;
 import com.example.t1.context.app.model.TechSolution;
@@ -9,7 +10,15 @@ import com.example.t1.context.app.repository.TechSolutionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -18,14 +27,15 @@ public class TechSolutionService {
     private final TechSolutionRepository techSolutionRepository;
     private final RangeCheckerService rangeCheckerService;
 
-    public Long createTechSolution(TechSolutionDTO techSolutionDTO){
-
+    public Long createTechSolution(TechSolutionDTO techSolutionDTO) throws Exception {
         TechSolution techSolution = TechSolutionMapper.toEntityTechSolution(techSolutionDTO);
-        techSolution.setCurrentAverageScore(1.0);
-        techSolution.setCurrentEffectiveness(1.0);
-        techSolution.setCurrentUsesNum(0);
-        techSolutionRepository.save(techSolution);
-        return techSolutionRepository.findByName(techSolution.getName()).get().getId();
+//        if (techSolutionDTO.getDocumentationUrl() != null
+//                && !techSolutionDTO.getDocumentationUrl().isBlank()
+//                && !(isAvailable(techSolutionDTO.getDocumentationUrl()))) {
+//            throw new InvalidUrlException("Некорректная ссылка на документацию");
+//        }
+        techSolution.setCurrentEffectiveness(0d);
+        return techSolutionRepository.save(techSolution).getId();
     }
 
     public boolean deleteTechSolution(Long techSolutionId) {
@@ -38,10 +48,16 @@ public class TechSolutionService {
     }
 
     public List<TechSolution> getAllTechSolutions(){
-        return techSolutionRepository.findAll();
+        return new ArrayList<>(techSolutionRepository.findAll());
     }
 
-    public boolean updateTechSolution(TechSolution updatedTechSolution) {
+
+    public boolean updateTechSolution(TechSolution updatedTechSolution) throws Exception {
+//        if (updatedTechSolution.getDocumentationUrl() != null
+//                && !updatedTechSolution.getDocumentationUrl().isBlank()
+//                && !(isAvailable(updatedTechSolution.getDocumentationUrl()))) {
+//            throw new InvalidUrlException("Некорректная ссылка на документацию");
+//        }
         return techSolutionRepository.findById(updatedTechSolution.getId())
                 .map(existingTechSolution -> {
                     existingTechSolution.setName(updatedTechSolution.getName());
@@ -54,47 +70,20 @@ public class TechSolutionService {
     }
 
     public List<TechSolution> getTechSolutionsByCategory(Category category) {
-        return techSolutionRepository.findByCategory(category);
+        return new ArrayList<>(techSolutionRepository.findByCategory(category));
     }
 
-
-    public void handleScoreInsert(Long techSolutionId, Integer newScore) {
-        TechSolution techSolution = techSolutionRepository.findById(techSolutionId)
-                .orElseThrow(() -> new RuntimeException("TechSolution not found with id: " + techSolutionId));
-        Double newScoreSum = techSolution.getCurrentAverageScore() * techSolution.getCurrentUsesNum() + newScore;
-        Integer usesNum = techSolution.getCurrentUsesNum() + 1;
-        updateFields(techSolution, newScoreSum, usesNum);
+    public List<Long> getTechSolutionsIdByCategory(Category category) {
+        return techSolutionRepository.findByCategory(category).stream()
+                .map(TechSolution::getId)
+                .collect(Collectors.toList());
     }
 
-
-    public void handleScoreUpdate(Long techSolutionId, Integer newScore, Integer oldScore) {
-        TechSolution techSolution = techSolutionRepository.findById(techSolutionId)
-                .orElseThrow(() -> new RuntimeException("TechSolution not found with id: " + techSolutionId));
-        if (newScore == null || newScore < 1 || newScore > 10) {
-            throw new IllegalArgumentException("Score must be between 1 and 10.");
-        }
-
-        Double newScoreSum = techSolution.getCurrentAverageScore() * techSolution.getCurrentUsesNum() + newScore - oldScore;
-        Integer usesNum = techSolution.getCurrentUsesNum();
-        updateFields(techSolution, newScoreSum, usesNum);
-
+    public void updateFields(TechSolution techSolution) {
+        techSolutionRepository.save(techSolution);
     }
 
-    public void handleScoreDelete(Long techSolutionId, Integer oldScore) {
-        TechSolution techSolution = techSolutionRepository.findById(techSolutionId)
-                .orElseThrow(() -> new RuntimeException("TechSolution not found with id: " + techSolutionId));
-        Double newScoreSum = techSolution.getCurrentAverageScore() * techSolution.getCurrentUsesNum() + oldScore;
-        Integer usesNum = techSolution.getCurrentUsesNum()-1;
-        updateFields(techSolution, newScoreSum, usesNum);
-    }
-
-
-
-    private void updateFields(TechSolution techSolution, Double newScoreSum, Integer usesNum) {
-        Double newAvgScore = newScoreSum/usesNum;
-        Integer maxUses = techSolutionRepository.findMaxUses().orElse(1);
-        Double newEffectiveness = newAvgScore + 5 * (usesNum/maxUses);
-
+    public void setNewStatus(TechSolution techSolution, Double newEffectiveness) {
         var oldRingNum = rangeCheckerService.determineRange(techSolution.getCurrentEffectiveness());
         var newRingNum = rangeCheckerService.determineRange(newEffectiveness);
         var difference = oldRingNum - newRingNum;
@@ -104,19 +93,10 @@ public class TechSolutionService {
         } else if (difference < 0) {
             techSolution.setStatus(Status.MOVED_DOWN);
         }
+    }
 
-        if (newEffectiveness < 1 || newEffectiveness > 15) {
-            throw new IllegalArgumentException("Calculated effectiveness is out of valid range.");
-        }
-
-        if (newAvgScore < 1 || newAvgScore > 10) {
-            throw new IllegalArgumentException("Calculated average score is out of valid range.");
-        }
-        techSolution.setCurrentAverageScore(newAvgScore);
-
-        techSolution.setCurrentEffectiveness(newEffectiveness);
-        techSolution.setCurrentUsesNum(usesNum);
-        techSolutionRepository.save(techSolution);
+    public Optional<TechSolution> getTechSolutionById(Long techSolutionId) {
+        return techSolutionRepository.findById(techSolutionId);
     }
 
     public boolean checkPresenceById(Long techSolutionId) {
@@ -124,7 +104,25 @@ public class TechSolutionService {
     }
 
     public List<TechSolution> getAllNotNullSolutions(){
-        return techSolutionRepository.findAllWhereFieldsNotNull();
+        return techSolutionRepository.findAll();
+    }
+
+    public boolean isAvailable(String url) throws InvalidUrlException {
+
+        HttpURLConnection connection = null;
+        try {
+            connection = (HttpURLConnection) new URL(url).openConnection();
+            connection.setRequestMethod("HEAD");
+            return connection.getResponseCode() == HttpURLConnection.HTTP_OK;
+        } catch (MalformedURLException e) {
+            throw new InvalidUrlException("Неверный формат URL: " + url);
+        } catch (IOException e) {
+            throw new InvalidUrlException("Ошибка при подключении к URL: " + url);
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
     }
 
 

@@ -1,19 +1,21 @@
 package com.example.t1.context.app.model.enums;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@RequiredArgsConstructor
 public enum Status {
-    NEW("NEW"),
-    MOVED_UP("MOVED_UP"),
-    MOVED_DOWN("MOVED_DOWN");
 
-    private final String status;
+    MOVED_DOWN(-1),
+    MOVED_UP(1),
+    NEW(2);
 
-    Status(String status) {
-        this.status = status;
-    }
-
+    private final Integer num;
 
     @Override
     public String toString() {
         return super.toString().toUpperCase();
     }
+
 }

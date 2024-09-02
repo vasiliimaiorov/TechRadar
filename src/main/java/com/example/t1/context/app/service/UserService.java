@@ -1,5 +1,6 @@
 package com.example.t1.context.app.service;
 
+import com.example.t1.context.app.api.RegisterRequest;
 import com.example.t1.context.app.model.User;
 import com.example.t1.context.app.model.enums.UserRole;
 import com.example.t1.context.app.repository.UserRepository;
@@ -43,6 +44,20 @@ public class UserService {
             return user.get();
         }
         throw new UsernameNotFoundException("User not found");
+    }
+
+    public User addUser(RegisterRequest request) {
+        var user = User.builder()
+                .login(request.login())
+                .password(request.password())
+                .role(request.role())
+                .build();
+        return userRepository.save(user);
+    }
+
+    public boolean checkIfExists(String login) {
+        final var dbUser = userRepository.findByLogin(login);
+        return dbUser.isPresent();
     }
 
 }
