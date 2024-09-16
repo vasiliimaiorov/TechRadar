@@ -1,3 +1,4 @@
+Сам кейс: ИТ-лагерь Т1. Кейс 10. Техрадар
 ## для backend
 ```
 mvn clean package -DskipTests
